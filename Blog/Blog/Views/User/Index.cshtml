@@ -1,0 +1,26 @@
+﻿@model List<Blog.Models.User>
+@{
+	ViewData["title"] = "Users";
+}
+<h1>Manage users</h1>
+<table class="table">
+	<thead>
+		<tr>
+			<th>Username</th>
+			<th>Email</th>
+		</tr>
+		
+		
+	</thead>
+	<tbody>
+		@foreach(var user in Model){
+			<tr>
+		<td>@user.Username</td>
+		<td>@user.Email</td>
+		<td><a asp-action="Edit" asp-route-id="@user.Id">Edit</a></td>
+		<td><a asp-action="Delete" asp-route-id="@user.Id">Delete</a></td>
+			</tr>
+		}
+	</tbody>
+	<a asp-controller="User" asp-action="Create">Create new user here!</a>
+</table>

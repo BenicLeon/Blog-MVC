@@ -92,7 +92,7 @@ namespace Blog.Controllers
         public  IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Login", "Login");
+            return RedirectToAction("Login", "Account");
         }
     }
 

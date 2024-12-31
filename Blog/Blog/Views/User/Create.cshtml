@@ -1,0 +1,32 @@
+﻿@model Blog.Models.User
+
+@{
+    ViewData["Title"] = "Create user";
+}
+
+
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        <label for="Username">Username:</label>
+        <input type="text" class="form-control" asp-for="Username" />
+        @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label for="Password">Password:</label>
+        <input type="password" class="form-control" asp-for="Password" />
+        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label for="Email">Email:</label>
+        <input type="text" class="form-control" asp-for="Email" />
+        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+    </div>
+
+    <button type="submit" class="btn btn-dark">Create user!</button>
+
+</form>
