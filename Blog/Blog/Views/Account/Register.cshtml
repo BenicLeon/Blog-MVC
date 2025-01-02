@@ -1,0 +1,38 @@
+﻿@model Blog.Models.User
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <h1 class="display-4">Please, Register here</h1>
+    </div>
+
+    <form asp-action="Register" method="post" class="needs-validation" novalidate>
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            <label for="Username" class="form-label">Username:</label>
+            <input type="text" class="form-control" asp-for="Username" placeholder="Enter your username" required />
+            @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            <label for="Password" class="form-label">Password:</label>
+            <input type="password" class="form-control" asp-for="Password" placeholder="Enter your password" required />
+            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            <label for="Email" class="form-label">Email:</label>
+            <input type="email" class="form-control" asp-for="Email" placeholder="Enter your email" required />
+            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <button type="submit" class="btn btn-primary">Register</button>
+            <a class="btn btn-link" asp-controller="Account" asp-action="Login">Login here!</a>
+        </div>
+    </form>
+</div>

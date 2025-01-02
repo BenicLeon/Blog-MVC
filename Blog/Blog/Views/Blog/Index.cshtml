@@ -1,0 +1,97 @@
+﻿@model IEnumerable<Blog.Models.BlogPost>
+
+@{
+    ViewData["Title"] = "Blog Posts";
+    int.TryParse(ViewData["UserId"]?.ToString(), out var userId);
+}
+
+<div class="container mt-5">
+    
+    <h2 class="text-center mb-4">Blog Posts</h2>
+
+    
+    <form asp-action="Index" method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="searchQuery" class="form-control" placeholder="Search by title" value="@Context.Request.Query["searchQuery"]" />
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <a asp-controller="Blog" asp-action="Create" class="btn btn-success mb-3"><i class="bi bi-plus"></i></a>
+
+    @if (Model != null && Model.Any())
+    {
+        foreach (var blogPost in Model)
+        {
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="h4">@blogPost.Title</h3>
+                </div>
+
+                <div class="card-body">
+                    <p>@blogPost.Content</p>
+
+                    @if (blogPost.User != null)
+                    {
+                        <p class="small text-muted"><strong>Created by:</strong> @blogPost.User.Username</p>
+                    }
+                    else
+                    {
+                        <p class="small text-muted"><strong>Created by:</strong> Unknown</p>
+                    }
+
+                    <p class="small text-muted">
+                        <strong>Created at:</strong> @blogPost.CreatedAt.ToString("MMMM dd, yyyy HH:mm")<br />
+                        <strong>Updated at:</strong> @blogPost.UpdatedAt.ToString("MMMM dd, yyyy HH:mm")
+                    </p>
+                </div>
+
+                <div class="card-footer">
+                    @if (blogPost.User.Id == userId)
+                    {
+                        <div class="d-flex justify-content-end">
+                            <a asp-controller="Blog" asp-action="Edit" asp-route-id="@blogPost.Id" class="btn btn-warning btn-sm me-2"><i class="bi bi-pencil-square"></i></a>
+                            <a asp-controller="Blog" asp-action="Delete" asp-route-id="@blogPost.Id" class="btn btn-danger btn-sm"><i class="bi bi-trash-fill"></i></a>
+                        </div>
+                    }
+
+                    <h4 class="h5 mt-4">Comments</h4>
+                    <a asp-controller="Blog" asp-action="CreateComment" asp-route-blogPostId="@blogPost.Id" class="btn btn-success btn-sm me-2"><i class="bi bi-plus"></i></a>
+                    @if (blogPost.Comments != null && blogPost.Comments.Any())
+                    {
+                        foreach (var comment in blogPost.Comments)
+                        {
+                            <div class="border-bottom pb-2 mb-2">
+                                <div class="comment">
+                                    @if (comment.User != null)
+                                    {
+                                        <p class="font-weight-bold">@comment.User.Username:</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="font-weight-bold">Unknown user:</p>
+                                    }
+
+                                    <p class="small">@comment.Content</p>
+
+                                    <p class="small text-muted">
+                                        <strong>Created at:</strong> @comment.CreatedAt.ToString("MMMM dd, yyyy HH:mm")<br />
+                                        <strong>Updated at:</strong> @comment.UpdatedAt.ToString("MMMM dd, yyyy HH:mm")
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">No comments yet.</p>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-center">No blog posts found.</p>
+    }
+</div>
