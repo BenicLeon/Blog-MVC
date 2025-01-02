@@ -1,111 +1,119 @@
-﻿using Blog.Data;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Blog.Filters;
+﻿using Blog.Filters;
 using Blog.Models;
+using Blog.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace Blog.Controllers
 {
     public class UserController : Controller
     {
+        private readonly IUserService _userService;
         private readonly ILogger<UserController> _logger;
-        private readonly BlogsContext _context;
 
-        public UserController(ILogger<UserController> logger, BlogsContext context)
+        public UserController(IUserService userService, ILogger<UserController> logger)
         {
+            _userService = userService;
             _logger = logger;
-            _context = context;
         }
+
+       
         [HttpGet]
         [RequireLogin]
         public async Task<IActionResult> Index()
         {
-            var users = await _context.Users.ToListAsync();
+            var users = await _userService.GetUsersAsync();
             return View(users);
         }
+
+        
         [HttpGet]
         [RequireLogin]
-        public  IActionResult Create()
+        public IActionResult Create()
         {
             return View();
         }
 
+        
         [HttpPost]
         [RequireLogin]
         public async Task<IActionResult> Create([Bind("Username", "Email", "Password")] User model)
         {
             if (ModelState.IsValid)
             {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-                if (user != null)
+                bool success = await _userService.CreateUserAsync(model);
+                if (!success)
                 {
                     ModelState.AddModelError("Email", "This email is already registered.");
                     return View(model);
                 }
-                await _context.AddAsync(model);
-                await _context.SaveChangesAsync();
-
 
                 return RedirectToAction("Index");
             }
 
-
             return View(model);
         }
+
+        
         [HttpGet]
         [RequireLogin]
         public async Task<IActionResult> Edit(int id)
         {
-            var user = await GetUserAsync(id);
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
             return View(user);
         }
+
+
         [HttpPost]
         [RequireLogin]
         public async Task<IActionResult> Edit(int id, [Bind("Username", "Password", "Email")] User model)
         {
             if (ModelState.IsValid)
             {
-				var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-                if (user != null)
+                model.Id = id;  
+
+                bool success = await _userService.UpdateUserAsync(model);
+                if (!success)
                 {
-                    ModelState.AddModelError("Email", "This email is already registered.");
+                    ModelState.AddModelError("Email", "This email is already registered or in use by another user.");
                     return View(model);
                 }
-                else
-                {
-                    _context.Users.Update(model);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction("Index");
-                }
+
+                return RedirectToAction("Index");
             }
+
             return View(model);
         }
+
+
         [HttpGet]
         [RequireLogin]
         public async Task<IActionResult> Delete(int id)
         {
-            var user = await GetUserAsync(id);
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
             return View(user);
-            
         }
+
+        
         [HttpPost, ActionName("Delete")]
         [RequireLogin]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if(user != null)
+            bool success = await _userService.DeleteUserAsync(id);
+            if (!success)
             {
-                _context.Users.Remove(user);
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
+
             return RedirectToAction("Index");
         }
-        private async Task<User> GetUserAsync(int id)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
-            return user;
-        }
-       
     }
 }
-

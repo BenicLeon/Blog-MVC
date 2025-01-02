@@ -2,15 +2,21 @@
 using System;
 using Blog.Data;
 using Microsoft.AspNetCore.Mvc;
+using Blog.Services.Interfaces;
+using Blog.Services.Implementation;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
-
+builder.Services.AddDbContext<BlogsContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString"))
+);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages().AddMvcOptions(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
 
-
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBlogService, BlogService>();
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); 
@@ -18,7 +24,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-builder.Services.AddDbContext<BlogsContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Data Source=DESKTOP-KDHUHUT;Initial Catalog=blogs;Integrated Security=True;Pooling=False;Encrypt=True;Trust Server Certificate=True")));
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole(); 
@@ -45,7 +50,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Blog}/{action=Index}/{id?}");
 
 
 

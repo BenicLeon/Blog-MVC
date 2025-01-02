@@ -1,13 +1,21 @@
 ﻿@model Blog.Models.User
+
 @{
-	ViewData["title"] = "Delete";
+    ViewData["Title"] = "Delete User";
 }
-<p>Are you sure you want to delete user:</p>
-<h2>@Model.Username</h2>
-<h2>@Model.Email</h2>
 
-<form asp-action="Delete" method="post">
-	<input type="hidden" asp-for="Id"/>
-	<input type="submit" value="Delete" class="btn btn-danger"/>
+<div class="container">
+    <h2>Delete User</h2>
+    <p>Are you sure you want to delete the following user?</p>
 
-</form>
+    <div class="alert alert-warning">
+        <h4>@Model.Username</h4>
+        <p>@Model.Email</p>
+    </div>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger"><i class="bi bi-trash-fill"></i></button>
+        <a href="@Url.Action("Index", "User")" class="btn btn-secondary ml-2"><i class="bi bi-x-circle-fill"></i></a>
+    </form>
+</div>

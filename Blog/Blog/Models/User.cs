@@ -14,12 +14,18 @@ public partial class User
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    
-    public string Username { get; set; } = null!;
 
-    
-    public string Password { get; set; } = null!;
+    [Required]
+    [StringLength(100, ErrorMessage = "Username must be between 4 and 100 characters.", MinimumLength = 4)]
+    public string? Username { get; set; }
 
-   
-    public string Email { get; set; } = null!;
+
+    [Required]
+    [DataType(DataType.Password)]
+    public string? Password{ get; set; }
+
+
+    [Required]
+    [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+    public string? Email { get; set; }
 }

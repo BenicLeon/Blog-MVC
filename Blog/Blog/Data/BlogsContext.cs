@@ -20,9 +20,6 @@ public partial class BlogsContext : DbContext
     public DbSet<BlogPost> BlogPosts { get; set; }
     public DbSet<Comment> Comments { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-
-        => optionsBuilder.UseSqlServer("Data Source=DESKTOP-KDHUHUT;Initial Catalog=blogs;Integrated Security=True;Pooling=False;Encrypt=True;Trust Server Certificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

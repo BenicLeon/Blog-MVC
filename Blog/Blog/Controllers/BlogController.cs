@@ -1,22 +1,20 @@
-﻿using Blog.Data;
+﻿using Blog.Filters;
 using Blog.Models;
+using Blog.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Blog.Filters;
-using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
-
+using System.Threading.Tasks;
 
 namespace Blog.Controllers
 {
     public class BlogController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly BlogsContext _context;
+        private readonly IBlogService _blogService;
+        
 
-        public BlogController(ILogger<HomeController> logger, BlogsContext context)
+        public BlogController(IBlogService blogService)
         {
-            _logger = logger;
-            _context = context;
+            _blogService = blogService;
+           
         }
 
         [RequireLogin]
@@ -25,18 +23,7 @@ namespace Blog.Controllers
             var userId = HttpContext.Session.GetString("UserId");
             ViewData["UserId"] = userId;
 
-            var blogPostsQuery = _context.BlogPosts
-                .Include(bp => bp.User)
-                .Include(bp => bp.Comments)
-                .ThenInclude(c => c.User)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchQuery))
-            {
-                blogPostsQuery = blogPostsQuery.Where(bp => bp.Title.Contains(searchQuery));
-            }
-
-            var blogPosts = await blogPostsQuery.ToListAsync();
+            var blogPosts = await _blogService.GetBlogPostsAsync(searchQuery);
 
             if (!blogPosts.Any())
             {
@@ -51,6 +38,7 @@ namespace Blog.Controllers
         {
             return View();
         }
+
         [RequireLogin]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -62,22 +50,23 @@ namespace Blog.Controllers
             }
 
             var userIdString = HttpContext.Session.GetString("UserId");
-
             if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
             {
                 ModelState.AddModelError("", "User not logged in or invalid session.");
                 return View(blogPost);
             }
 
-            blogPost.UserId = userId;
-            blogPost.CreatedAt = DateTime.Now;
-            blogPost.UpdatedAt = DateTime.Now;
+            var success = await _blogService.CreateBlogPostAsync(blogPost, userId);
 
-            _context.BlogPosts.Add(blogPost);
-            await _context.SaveChangesAsync();
+            if (success)
+            {
+                return RedirectToAction("Index");
+            }
 
-            return RedirectToAction("Index");
+            ModelState.AddModelError("", "Error creating blog post.");
+            return View(blogPost);
         }
+
         [RequireLogin]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -86,7 +75,7 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            var blogPost = await _context.BlogPosts.FindAsync(id);
+            var blogPost = await _blogService.GetBlogPostByIdAsync(id.Value);
             if (blogPost == null)
             {
                 return NotFound();
@@ -122,20 +111,14 @@ namespace Blog.Controllers
                 return Forbid();
             }
 
-            var existingPost = await _context.BlogPosts.FindAsync(id);
-            if (existingPost == null || existingPost.UserId != userId)
+            var success = await _blogService.UpdateBlogPostAsync(blogPost, userId);
+            if (success)
             {
-                return Forbid();
+                return RedirectToAction("Index");
             }
 
-            existingPost.Title = blogPost.Title;
-            existingPost.Content = blogPost.Content;
-            existingPost.UpdatedAt = DateTime.Now;
-
-            _context.Update(existingPost);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index");
+            ModelState.AddModelError("", "Error updating blog post.");
+            return View(blogPost);
         }
 
         [RequireLogin]
@@ -146,10 +129,7 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            var blogPost = await _context.BlogPosts
-                .Include(bp => bp.User)
-                .FirstOrDefaultAsync(bp => bp.Id == id);
-
+            var blogPost = await _blogService.GetBlogPostByIdAsync(id.Value);
             if (blogPost == null)
             {
                 return NotFound();
@@ -169,27 +149,25 @@ namespace Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var blogPost = await _context.BlogPosts.FindAsync(id);
-
-            if (blogPost == null)
-            {
-                return NotFound();
-            }
-
             var userIdString = HttpContext.Session.GetString("UserId");
-            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId) || blogPost.UserId != userId)
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
             {
                 return Forbid();
             }
 
-            _context.BlogPosts.Remove(blogPost);
-            await _context.SaveChangesAsync();
+            var success = await _blogService.DeleteBlogPostAsync(id, userId);
 
-            return RedirectToAction("Index");
+            if (success)
+            {
+                return RedirectToAction("Index");
+            }
+
+            return Forbid();
         }
+
         [RequireLogin]
         [HttpGet]
-        public  IActionResult CreateComment(int blogPostId)
+        public IActionResult CreateComment(int blogPostId)
         {
             var userIdString = HttpContext.Session.GetString("UserId");
             if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
@@ -197,14 +175,12 @@ namespace Blog.Controllers
                 return Forbid();
             }
 
-            
-            var blogPost =  _context.BlogPosts.Find(blogPostId);
+            var blogPost = _blogService.GetBlogPostByIdAsync(blogPostId).Result;
             if (blogPost == null)
             {
                 return NotFound();
             }
 
-            
             var comment = new Comment
             {
                 BlogPostId = blogPost.Id,
@@ -221,35 +197,17 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var blogPost = await _context.BlogPosts.FindAsync(model.BlogPostId);
-                if (blogPost == null)
+                var success = await _blogService.CreateCommentAsync(model);
+
+                if (success)
                 {
-                    ModelState.AddModelError("", "Blog post not found.");
-                    return View(model);
+                    return RedirectToAction("Index");
                 }
 
-                
-                var comment = new Comment
-                {
-                    Content = model.Content, 
-                    BlogPostId = blogPost.Id,
-                    UserId = model.UserId,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
-                };
-
-                _context.Comments.Add(comment); 
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction("Index");
+                ModelState.AddModelError("", "Error creating comment.");
             }
 
             return View(model);
         }
-
-
-
-
     }
 }
-

@@ -1,27 +1,35 @@
 ﻿@model List<Blog.Models.User>
+
 @{
-	ViewData["title"] = "Users";
+    ViewData["Title"] = "Manage Users";
 }
-<h1>Manage users</h1>
-<table class="table">
-	<thead>
-		<tr>
-			<th>Username</th>
-			<th>Email</th>
-		</tr>
-		
-		
-	</thead>
-	<tbody>
-		@foreach(var user in Model){
-			<tr>
-		<td>@user.Username</td>
-		<td>@user.Email</td>
-		<td><a asp-action="Edit" asp-route-id="@user.Id">Edit</a></td>
-		<td><a asp-action="Delete" asp-route-id="@user.Id">Delete</a></td>
-		
-			</tr>
-		}
-	</tbody>
-	<a asp-controller="User" asp-action="Create">Create new user here!</a>
-</table>
+
+<div class="container">
+    
+
+    <h1>Manage Users</h1>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.Username</td>
+                    <td>@user.Email</td>
+                    <td>
+                        <a class="btn btn-warning btn-sm" asp-action="Edit" asp-route-id="@user.Id"><i class="bi bi-pencil-square"></i></a>
+                        <a class="btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@user.Id"><i class="bi bi-trash-fill"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <a class="btn btn-success" asp-controller="User" asp-action="Create"><i class="bi bi-plus"></i></a>
+</div>
