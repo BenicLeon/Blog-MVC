@@ -59,9 +59,9 @@ namespace Blog.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login([Bind("Username", "Password")] User model)
+        public async Task<IActionResult> Login([Bind("Username,Password")] User model)
         {
-
+           
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == model.Username && u.Password == model.Password);
 
@@ -69,9 +69,8 @@ namespace Blog.Controllers
             if (user != null)
             {
 
+                HttpContext.Session.SetString("UserId", user.Id.ToString());
                 HttpContext.Session.SetString("Username", user.Username);
-                HttpContext.Session.SetString("Email", user.Email);
-                HttpContext.Session.SetInt32("UserId", user.Id);
 
 
 

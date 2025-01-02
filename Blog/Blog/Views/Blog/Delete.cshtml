@@ -1,0 +1,33 @@
+﻿@model Blog.Models.BlogPost
+
+@{
+    ViewData["Title"] = "Delete Blog Post";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Delete Blog Post</h2>
+
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h3 class="h4">Are you sure you want to delete this blog post?</h3>
+        </div>
+
+        <div class="card-body">
+            <h5 class="card-title">@Model.Title</h5>
+            <p class="card-text">@Model.Content</p>
+
+            <p class="text-muted">
+                <strong>Created at:</strong> @Model.CreatedAt.ToString("MMMM dd, yyyy HH:mm")<br />
+                <strong>Updated at:</strong> @Model.UpdatedAt.ToString("MMMM dd, yyyy HH:mm")
+            </p>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>

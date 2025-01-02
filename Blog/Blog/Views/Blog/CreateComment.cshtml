@@ -1,0 +1,17 @@
+﻿@model Blog.Models.Comment
+
+<form asp-action="CreateComment" method="post">
+    <div class="form-group">
+        <label for="Content">Comment</label>
+        <textarea id="Content" name="Content" class="form-control" rows="3">Message...</textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+
+    
+    <input type="hidden" asp-for="BlogPostId" />
+
+   
+    <input type="hidden" asp-for="UserId" value="@Model.UserId" />
+
+    <button type="submit" class="btn btn-primary mt-3">Submit</button>
+</form>

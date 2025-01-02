@@ -1,0 +1,30 @@
+﻿@model Blog.Models.BlogPost
+
+@{
+    ViewData["Title"] = "Edit Blog Post";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Edit Blog Post</h2>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Title</label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Content" class="form-label">Content</label>
+            <textarea asp-for="Content" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="Content" class="text-danger"></span>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div>

@@ -17,6 +17,8 @@ public partial class BlogsContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }
+    public DbSet<BlogPost> BlogPosts { get; set; }
+    public DbSet<Comment> Comments { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 
@@ -28,7 +30,47 @@ public partial class BlogsContext : DbContext
         {
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
-        
+        modelBuilder.Entity<BlogPost>(entity =>
+        {
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+        });
+        modelBuilder.Entity<Comment>(entity =>
+        {
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+        });
+
+        modelBuilder.Entity<BlogPost>()
+       .ToTable("blog_posts");
+
+        modelBuilder.Entity<BlogPost>()
+       .Property(bp => bp.CreatedAt)
+       .HasColumnName("created_at");  
+
+        modelBuilder.Entity<BlogPost>()
+            .Property(bp => bp.UpdatedAt)
+            .HasColumnName("updated_at");
+
+        modelBuilder.Entity<BlogPost>()
+            .Property(bp => bp.UserId)
+            .HasColumnName("user_id");
+
+       
+        modelBuilder.Entity<Comment>()
+            .Property(c => c.CreatedAt)
+            .HasColumnName("created_at"); 
+
+        modelBuilder.Entity<Comment>()
+            .Property(c => c.UpdatedAt)
+            .HasColumnName("updated_at");
+
+        modelBuilder.Entity<Comment>()
+            .Property(c => c.UserId)
+            .HasColumnName("user_id");
+
+        modelBuilder.Entity<Comment>()
+            .Property(c => c.BlogPostId)
+            .HasColumnName("blogpost_id");
+
         OnModelCreatingPartial(modelBuilder);
     }
 
