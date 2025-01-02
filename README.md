@@ -42,7 +42,7 @@ Once the database is set up, update the connection string in the `appsettings.js
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "your_connection_string_here"
+    "ConnectionString": "your_connection_string_here"
   }
 }
 
