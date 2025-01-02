@@ -36,8 +36,8 @@ The application requires a SQL Server database. First, create a database named `
 2. Use the `SeedTable` script to populate the database with sample data.
 
 ### 2. **Configure Connection String**
-Connection string can be found right click on connection->properties
-Once the database is set up, update the connection string in the `appsettings.json` file:
+- Connection string can be found right click on connection->properties
+- Once the database is set up, update the connection string in the `appsettings.json` file:
 
 ```json
 {
